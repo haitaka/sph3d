@@ -1,5 +1,7 @@
 package me.haitaka.sph3d;
 
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -31,6 +33,15 @@ class ParticlesState {
         } else {
             dust_particles.add((DustParticle) particle);
             cell.add_particle(particle);
+        }
+    }
+
+    void print(PrintWriter writer) {
+        for (GasParticle part: gas_particles) {
+            writer.println(part.x + " " + part.y + " " + part.z);
+        }
+        for (DustParticle part: dust_particles) {
+            writer.println(part.x + " " + part.y + " " + part.z);
         }
     }
 

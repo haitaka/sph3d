@@ -58,6 +58,10 @@ class GasParticle extends Particle {
     GasParticle() {
     }
 
+    GasParticle(double x, double y, double z) {
+        set_coordinates(x, y, z);
+    }
+
     GasParticle(GasParticle another) {
         super(another);
     }

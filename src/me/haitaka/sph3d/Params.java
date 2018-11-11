@@ -8,8 +8,8 @@ class Params {
     double kx;
     double ky;
     double kz;
-    double n_gas = 100;
-    double n_dust = 0;
+    int n_gas = 100;
+    int n_dust = 0;
     double h = 0.1;
     double smooth_radius = 2. * h;
     double tau = 0.1;

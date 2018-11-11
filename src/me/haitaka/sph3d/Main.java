@@ -1,7 +1,10 @@
 package me.haitaka.sph3d;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.function.Function;
 
+import static java.lang.Math.*;
 import static me.haitaka.sph3d.Common.kernel;
 import static me.haitaka.sph3d.Common.random_double;
 
@@ -52,6 +55,43 @@ public class Main {
         return init_state;
     }
 
+    private static ParticlesState regular_init_state() {
+        ParticlesState init_state = new ParticlesState();
+
+        Params params = Params.get_instance();
+
+        double radius = 0.2;
+        double abs_velo = radius / 2;
+
+        double center_x = (params.border2.x - params.border1.x) / 2;
+        double center_y = (params.border2.y - params.border1.y) / 2;
+        double center_z = (params.border2.z - params.border1.z) / 2;
+
+        for(int i = 0; i < params.n_gas; i += 1) {
+            double theta = acos(1 - 2 * (i + 0.5) / params.n_gas);
+            double phi = PI * (1 + pow(5, 0.5)) * (i + 0.5);
+
+            double rel_x = radius * cos(phi) * sin(theta);
+            double rel_y = radius * sin(phi) * sin(theta);
+            double rel_z = radius * cos(theta);
+
+            GasParticle p = new GasParticle(rel_x + center_x, rel_y + center_y, rel_z + center_z);
+
+            p.vx = rel_x / radius * abs_velo;
+            p.vy = rel_y / radius * abs_velo;
+            p.vz = rel_z / radius * abs_velo;
+
+            p.mass = 1. / params.n_gas;
+
+            // System.out.println("" + p.x + " " + p.y + " " + p.z);
+            init_state.with_copy_of(p);
+        }
+
+        recalc_density(init_state);
+
+        return init_state;
+    }
+
     private static Point find_new_coordinates(Particle particle) {
         Params params = Params.get_instance();
         double x = particle.x + params.tau * particle.vx;
@@ -76,6 +116,7 @@ public class Main {
                 }
             }
         }
+
         return density;
     }
 
@@ -109,37 +150,52 @@ public class Main {
             }
         }
 
+        recalc_density(old);
 
-        for (int i = 0; i < old_grid.x_size; ++i) {
-            for (int j = 0; j < old_grid.y_size; ++j) {
-                for (int k = 0; k < old_grid.z_size; ++k) {
-                    Cell cell = old_grid.cells.get(i).get(j).get(k);
+        return nextState;
+    }
+
+    private static void recalc_density(ParticlesState state) {
+        final Grid grid = state.grid;
+        for (int i = 0; i < grid.x_size; ++i) {
+            for (int j = 0; j < grid.y_size; ++j) {
+                for (int k = 0; k < grid.z_size; ++k) {
+                    Cell cell = grid.cells.get(i).get(j).get(k);
                     for (Particle particle : cell.get_all_particles()) {
-                        System.out.println("dens: " + find_density(particle, cell));
+                        particle.density = find_density(particle, cell);
                     }
                 }
             }
         }
-        return nextState;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
 
         long startTime = System.nanoTime();
 
-        // TODO rename me!!
-        ParticlesState state = initital_state();
+        //ParticlesState state = initital_state();
+        ParticlesState state = regular_init_state();
 
+        final String OUT_DIR = "/tmp/out";
+
+        try (PrintWriter writer = new PrintWriter(OUT_DIR + "/plot_" + 0 + ".dat");) {
+            state.print(writer);
+        }
         for (int i = 0; i < 10; ++i) {
             state = do_time_step(state);
+
+            try (PrintWriter writer = new PrintWriter(OUT_DIR + "/plot_" + (i + 1) + ".dat");) {
+                state.print(writer);
+            }
         }
 
         System.out.println("Done!");
 
         long finishTime = System.nanoTime();
 
-        double executionTime = finishTime - startTime;
-        System.out.println("Finished in " + executionTime + " seconds.");
+        long executionTime = finishTime - startTime;
+        System.out.println("Finished in " + (+
+                executionTime / pow(10, 9)) + " seconds.");
 
     }
 }
