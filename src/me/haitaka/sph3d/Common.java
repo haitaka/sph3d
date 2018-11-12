@@ -13,7 +13,7 @@ class Common {
     }
 
     static double kernel(double x_a, double x_b) {
-        double h = Params.get_instance().h;
+        double h = Params.get_instance().get().h;
         double r = abs(x_a - x_b);
         double q = r / h;
         double result;

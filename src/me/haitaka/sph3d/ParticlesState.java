@@ -1,48 +1,36 @@
 package me.haitaka.sph3d;
 
+import me.haitaka.sph3d.utils.Ref;
+
 import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
 
 class ParticlesState {
 
     final Grid grid;
 
-    private final Collection<GasParticle> gas_particles = new ArrayList<>();
-
-    private final Collection<DustParticle> dust_particles = new ArrayList<>();
-
     ParticlesState() {
-        Params params = Params.get_instance();
+        Ref<Params> params = Params.get_instance();
         grid = new Grid(
-                params.grid_step_x,
-                params.grid_step_y,
-                params.grid_step_z,
-                params.border1,
-                params.border2
+                params.get().grid_step_x,
+                params.get().grid_step_y,
+                params.get().grid_step_z,
+                new Ref<>(params.get().border1),
+                new Ref<>(params.get().border2)
         );
     }
 
 
-    void with_copy_of(Particle particle) {
-        Cell cell = grid.find_cell(particle);
-        if (particle instanceof GasParticle) {
-            gas_particles.add((GasParticle) particle);
-            cell.add_particle(particle);
-        } else {
-            dust_particles.add((DustParticle) particle);
-            cell.add_particle(particle);
-        }
+    void with_copy_of(Ref<Particle> particle) {
+        Ref<Cell> cell = grid.find_cell(particle);
+        cell.get().add_copy_of_particle(particle);
     }
 
     void print(PrintWriter writer) {
-        for (GasParticle part: gas_particles) {
-            writer.println(part.x + " " + part.y + " " + part.z);
-        }
-        for (DustParticle part: dust_particles) {
-            writer.println(part.x + " " + part.y + " " + part.z);
-        }
+        grid.for_each_cell(
+                (c) -> c.get().for_each_particle(
+                        (p) -> writer.println(p.get().x + " " + p.get().y + " " + p.get().z)
+                )
+        );
     }
 
 }

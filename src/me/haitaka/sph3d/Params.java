@@ -1,5 +1,7 @@
 package me.haitaka.sph3d;
 
+import me.haitaka.sph3d.utils.Ref;
+
 class Params {
     private static final Params INSTANCE = new Params();
     double t;
@@ -23,7 +25,7 @@ class Params {
     double grid_step_y = 0.01;
     double grid_step_z = 0.01;
 
-    static Params get_instance() {
-        return INSTANCE;
+    static Ref<Params> get_instance() {
+        return new Ref<>(INSTANCE);
     }
 }

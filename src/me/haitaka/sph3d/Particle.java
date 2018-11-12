@@ -1,6 +1,15 @@
 package me.haitaka.sph3d;
 
+import me.haitaka.sph3d.utils.Ref;
+
 class Particle {
+    
+    enum Kind {
+        Gas,
+        Dust
+    }
+    
+    Kind kind;
 
     double vx;
     double vy;
@@ -28,21 +37,23 @@ class Particle {
         density = 23;
         energy = 23;
     }
+    
+    Particle(Kind kind, double x, double y, double z) {
+        this.kind = kind;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 
-    Particle(Particle another) {
-        this.vx = another.vx;
-        this.vy = another.vy;
-        this.vz = another.vz;
-
-        this.mass = another.mass;
-
-        this.pressure = another.pressure;
-        this.density = another.density;
-        this.energy = another.energy;
-
-        this.x = another.x;
-        this.y = another.y;
-        this.z = another.z;
+    Particle(Ref<Particle> that) {
+        this(that.get().kind, that.get().x, that.get().y, that.get().z);
+        mass = that.get().mass;
+        pressure = that.get().pressure;
+        density = that.get().density;
+        energy = that.get().energy;
+        vx = that.get().vx;
+        vy = that.get().vy;
+        vz = that.get().vz;
     }
 
     void set_coordinates(double new_x, double new_y, double new_z) {
@@ -51,27 +62,4 @@ class Particle {
         z = new_z;
     }
 
-}
-
-
-class GasParticle extends Particle {
-    GasParticle() {
-    }
-
-    GasParticle(double x, double y, double z) {
-        set_coordinates(x, y, z);
-    }
-
-    GasParticle(GasParticle another) {
-        super(another);
-    }
-}
-
-class DustParticle extends Particle {
-    DustParticle() {
-    }
-
-    DustParticle(DustParticle another) {
-        super(another);
-    }
 }

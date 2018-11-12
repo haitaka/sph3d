@@ -1,5 +1,7 @@
 package me.haitaka.sph3d;
 
+import me.haitaka.sph3d.utils.Ref;
+
 public class Point {
 
     final double x;
@@ -12,13 +14,8 @@ public class Point {
         this.z = z;
     }
 
-    @Override
-    public boolean equals(Object that) {
-        if (that instanceof Point) {
-            Point thatPoint = (Point) that;
-            return x == thatPoint.x && y == thatPoint.y && z == thatPoint.z;
-        } else {
-            return false;
-        }
+    Point(Ref<Point> that) {
+        this(that.get().x, that.get().y, that.get().z);
     }
+
 }
